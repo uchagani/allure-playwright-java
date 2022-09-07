@@ -1,0 +1,9 @@
+<aspectj>
+    <weaver options="-warn:none -Xlint:ignore"/>
+    <aspects>
+        <aspect name="io.github.uchagani.allure.playwright.LocatorAspect"/>
+        <aspect name="io.github.uchagani.allure.playwright.PageAspect"/>
+        <aspect name="io.github.uchagani.allure.playwright.APIRequestContextAspect"/>
+        <aspect name="io.github.uchagani.allure.playwright.AssertionsAspect"/>
+    </aspects>
+</aspectj>
