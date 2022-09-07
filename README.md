@@ -2,6 +2,8 @@
 
 `allure-playwright-java` adds [Playwright](https://playwright.dev/java) actions as steps inside an [Allure Report](https://docs.qameta.io/allure-report/).
 
+![demo](https://raw.githubusercontent.com/uchagani/allure-playwright-java/main/demo.jpg)
+
 # Requirements
 * Java 8+
 * Playwright 1.18+
