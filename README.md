@@ -20,8 +20,8 @@
     <version>1.0.0</version>
 </dependency>
 ```
-
 3. Run tests as you normally would.
+4. Run `allure serve` to generate and launch report.
 
 # Note:
 
