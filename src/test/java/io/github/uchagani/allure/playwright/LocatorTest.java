@@ -20,15 +20,24 @@ import static io.qameta.allure.test.RunUtils.runWithinTestContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LocatorTest {
-
+    final static String html;
     final static String checkboxSelector = "#checkbox";
     final static String buttonSelector = "#button";
     final static String dragSourceSelector = "#source";
     final static String dragTargetSelector = "#target";
     final static String textBoxSelector = "#textbox";
+    final static String selectOptionSelector = "#select";
     final static double timeout = 50;
     Page page;
     Playwright playwright;
+
+    static {
+        try {
+            html = IOUtils.resourceToString("/content.html", StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @BeforeEach
     void getPage() {
@@ -43,7 +52,7 @@ public class LocatorTest {
 
     @Test
     void checkTest_Pass() {
-        page.setContent("<input type='checkbox' id='checkbox'>");
+        page.setContent(html);
         Locator locator = page.locator(checkboxSelector);
         AllureResults results = runTest(locator::check);
         assertStepsWhenPassed(results, checkStepPrefix + checkboxSelector);
@@ -58,7 +67,7 @@ public class LocatorTest {
 
     @Test
     void clickTest_Pass() {
-        page.setContent("<button type='button' id='button'>I'm a Button!</button>");
+        page.setContent(html);
         Locator locator = page.locator(buttonSelector);
         AllureResults results = runTest(locator::click);
         assertStepsWhenPassed(results, clickStepPrefix + buttonSelector);
@@ -73,7 +82,7 @@ public class LocatorTest {
 
     @Test
     void dblclickTest_Pass() {
-        page.setContent("<button type='button' id='button'>I'm a Button!</button>");
+        page.setContent(html);
         Locator locator = page.locator(buttonSelector);
         AllureResults results = runTest(locator::dblclick);
         assertStepsWhenPassed(results, dblclickStepPrefix + buttonSelector);
@@ -87,9 +96,8 @@ public class LocatorTest {
     }
 
     @Test
-    void dragToTest_Pass() throws IOException {
-        String content = IOUtils.resourceToString("/dragAndDrop.html", StandardCharsets.UTF_8);
-        page.setContent(content);
+    void dragToTest_Pass() {
+        page.setContent(html);
         Locator sourceLocator = page.locator(dragSourceSelector);
         Locator targetLocator = page.locator(dragTargetSelector);
         AllureResults results = runTest(() -> sourceLocator.dragTo(targetLocator));
@@ -107,7 +115,7 @@ public class LocatorTest {
     @Test
     void fillTest_Pass() {
         String value = "hello";
-        page.setContent("<input id='textbox'>");
+        page.setContent(html);
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.fill("hello"));
         assertStepsWhenPassed(results, "Fill " + textBoxSelector + " with " + value);
@@ -119,6 +127,70 @@ public class LocatorTest {
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.fill("hello", new Locator.FillOptions().setTimeout(timeout)));
         assertStepsWhenFailed(results, "Fill " + textBoxSelector + " with " + value);
+    }
+
+    @Test
+    void focusTest_Pass() {
+        page.setContent(html);
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(locator::focus);
+        assertStepsWhenPassed(results, focusStepPrefix + textBoxSelector);
+    }
+
+    @Test
+    void focusTest_Fail() {
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.focus(new Locator.FocusOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, focusStepPrefix + textBoxSelector);
+    }
+
+    @Test
+    void hoverTest_Pass() {
+        page.setContent(html);
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(locator::hover);
+        assertStepsWhenPassed(results, hoverStepPrefix + textBoxSelector);
+    }
+
+    @Test
+    void hoverTest_Fail() {
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.hover(new Locator.HoverOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, hoverStepPrefix + textBoxSelector);
+    }
+
+    @Test
+    void pressTest_Pass() {
+        String key = "Shift+a";
+        page.setContent(html);
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.press(key));
+        assertStepsWhenPassed(results, "Press key(s) " + key + " on " + textBoxSelector);
+    }
+
+    @Test
+    void pressTest_Fail() {
+        String key = "Shift+a";
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.press("Shift+a", new Locator.PressOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, "Press key(s) " + key + " on " + textBoxSelector);
+    }
+
+    @Test
+    void selectOptionTest_Pass() {
+        String value = "audi";
+        page.setContent(html);
+        Locator locator = page.locator(selectOptionSelector);
+        AllureResults results = runTest(() -> locator.selectOption(value));
+        assertStepsWhenPassed(results, selectOptionStepPrefix + selectOptionSelector);
+    }
+
+    @Test
+    void selectOptionTest_Fail() {
+        String value = "audi";
+        Locator locator = page.locator(selectOptionSelector);
+        AllureResults results = runTest(() -> locator.selectOption(value, new Locator.SelectOptionOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, selectOptionStepPrefix + selectOptionSelector);
     }
 
     AllureResults runTest(Runnable test) {

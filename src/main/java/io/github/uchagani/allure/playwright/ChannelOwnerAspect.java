@@ -30,21 +30,20 @@ public class ChannelOwnerAspect {
         actionMethodNamesMap.put(clickMethodName, clickStepPrefix);
         actionMethodNamesMap.put(dblclickMethodName, dblclickStepPrefix);
         actionMethodNamesMap.put(dragAndDropMethodName, "");
-
         actionMethodNamesMap.put(fillMethodName, "");
         actionMethodNamesMap.put(focusMethodName, focusStepPrefix);
-        actionMethodNamesMap.put(goBackMethodName, goBackStepPrefix);
-        actionMethodNamesMap.put(goForwardMethodName, goForwardStepPrefix);
         actionMethodNamesMap.put(hoverMethodName, hoverStepPrefix);
         actionMethodNamesMap.put(pressMethodName, pressStepPrefix);
         actionMethodNamesMap.put(selectOptionMethodName, selectOptionStepPrefix);
+
         actionMethodNamesMap.put(setInputFilesMethodName, setInputFilesStepPrefix);
         actionMethodNamesMap.put(tapMethodName, tapStepPrefix);
         actionMethodNamesMap.put(typeMethodName, typeStepPrefix);
         actionMethodNamesMap.put(uncheckMethodName, uncheckStepPrefix);
 
 
-
+        actionMethodNamesMap.put(goBackMethodName, goBackStepPrefix);
+        actionMethodNamesMap.put(goForwardMethodName, goForwardStepPrefix);
         actionMethodNamesMap.put("close", "Close ");
         actionMethodNamesMap.put("goto", "Navigate to ");
         actionMethodNamesMap.put("expect", "");
@@ -134,7 +133,11 @@ public class ChannelOwnerAspect {
     }
 
     private String getStepNameForFill(JsonObject params) {
-       return "Fill " + params.get("selector").getAsString() + " with " + params.get("value").getAsString();
+        return "Fill " + params.get("selector").getAsString() + " with " + params.get("value").getAsString();
+    }
+
+    private String getStepNameForPress(JsonObject params) {
+        return "Press key(s) " + params.get("key").getAsString() + " on " + params.get("selector").getAsString();
     }
 
     private String getStepName(String method, JsonObject params) {
@@ -156,6 +159,10 @@ public class ChannelOwnerAspect {
 
         if (method.equals("fill")) {
             return getStepNameForFill(params);
+        }
+
+        if (method.equals("press")) {
+            return getStepNameForPress(params);
         }
 
         return getStepNameForLocator(method, params);

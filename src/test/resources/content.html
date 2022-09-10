@@ -10,6 +10,10 @@ div:not(.mouse-helper) {
 #target {
   border: 1px solid black;
 }
+
+
+
+
 </style>
 
 <script>
@@ -29,6 +33,10 @@ function drop_handler(ev) {
   var data = ev.dataTransfer.getData("text");
   ev.target.appendChild(document.getElementById(data));
 }
+
+
+
+
 </script>
 
 <body>
@@ -37,4 +45,25 @@ function drop_handler(ev) {
         Select this element, drag it to the Drop Zone and then release the selection to move the element.</p>
 </div>
 <div id="target" ondrop="drop_handler(event);" ondragover="dragover_handler(event);">Drop Zone</div>
+
+<div>
+    <input type='checkbox' id='checkbox'>
+</div>
+
+<div>
+    <button type='button' id='button'>I'm a Button!</button>
+</div>
+
+<div>
+    <input id='textbox'>
+</div>
+
+<div>
+    <select id="select">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="opel">Opel</option>
+        <option value="audi">Audi</option>
+    </select>
+</div>
 </body>
