@@ -8,11 +8,11 @@ class Constants {
     static final String dblclickMethodName = "dblclick";
     static final String dblclickStepPrefix = "Double click ";
     static final String dragAndDropMethodName = "dragAndDrop";
-    static final String dragAndDropStepPrefix = "Drag and drop ";
-    static final String dragToMethodName = "dragTo";
-    static final String dragToStepPrefix = "Drag to ";
+//    static final String dragAndDropStepPrefix = "Drag and drop ";
+//    static final String dragToMethodName = "dragTo";
+//    static final String dragToStepPrefix = "Drag to ";
     static final String fillMethodName = "fill";
-    static final String fillStepPrefix = "Fill ";
+//    static final String fillStepPrefix = "Fill ";
     static final String focusMethodName = "focus";
     static final String focusStepPrefix = "Focus ";
     static final String goBackMethodName = "goBack";

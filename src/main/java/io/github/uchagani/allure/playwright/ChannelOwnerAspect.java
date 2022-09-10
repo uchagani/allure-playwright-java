@@ -28,10 +28,10 @@ public class ChannelOwnerAspect {
     static {
         actionMethodNamesMap.put(checkMethodName, checkStepPrefix);
         actionMethodNamesMap.put(clickMethodName, clickStepPrefix);
-        actionMethodNamesMap.put(dblclickMethodName,dblclickStepPrefix );
-        actionMethodNamesMap.put(dragAndDropMethodName, dragAndDropStepPrefix);
-        actionMethodNamesMap.put(dragToMethodName, dragToStepPrefix);
-        actionMethodNamesMap.put(fillMethodName, fillStepPrefix);
+        actionMethodNamesMap.put(dblclickMethodName, dblclickStepPrefix);
+        actionMethodNamesMap.put(dragAndDropMethodName, "");
+
+        actionMethodNamesMap.put(fillMethodName, "");
         actionMethodNamesMap.put(focusMethodName, focusStepPrefix);
         actionMethodNamesMap.put(goBackMethodName, goBackStepPrefix);
         actionMethodNamesMap.put(goForwardMethodName, goForwardStepPrefix);
@@ -42,6 +42,8 @@ public class ChannelOwnerAspect {
         actionMethodNamesMap.put(tapMethodName, tapStepPrefix);
         actionMethodNamesMap.put(typeMethodName, typeStepPrefix);
         actionMethodNamesMap.put(uncheckMethodName, uncheckStepPrefix);
+
+
 
         actionMethodNamesMap.put("close", "Close ");
         actionMethodNamesMap.put("goto", "Navigate to ");
@@ -127,6 +129,14 @@ public class ChannelOwnerAspect {
         return actionMethodNamesMap.get(method) + selector;
     }
 
+    private String getStepNameForDragAndDrop(JsonObject params) {
+        return "Drag " + params.get("source").getAsString() + " to " + params.get("target").getAsString();
+    }
+
+    private String getStepNameForFill(JsonObject params) {
+       return "Fill " + params.get("selector").getAsString() + " with " + params.get("value").getAsString();
+    }
+
     private String getStepName(String method, JsonObject params) {
         if (method.equals("fetch")) {
             return getStepNameForAPIRequest(params);
@@ -138,6 +148,14 @@ public class ChannelOwnerAspect {
 
         if (method.equals("expect")) {
             return getStepNameForAssertion(params);
+        }
+
+        if (method.equals("dragAndDrop")) {
+            return getStepNameForDragAndDrop(params);
+        }
+
+        if (method.equals("fill")) {
+            return getStepNameForFill(params);
         }
 
         return getStepNameForLocator(method, params);

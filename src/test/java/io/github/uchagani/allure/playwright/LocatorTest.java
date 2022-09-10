@@ -7,15 +7,13 @@ import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
 import io.qameta.allure.test.AllureResults;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static io.github.uchagani.allure.playwright.Constants.*;
 import static io.qameta.allure.test.RunUtils.runWithinTestContext;
@@ -25,38 +23,12 @@ public class LocatorTest {
 
     final static String checkboxSelector = "#checkbox";
     final static String buttonSelector = "#button";
+    final static String dragSourceSelector = "#source";
+    final static String dragTargetSelector = "#target";
+    final static String textBoxSelector = "#textbox";
+    final static double timeout = 50;
     Page page;
     Playwright playwright;
-
-    private static Stream<Arguments> locatorPassTestDataProvider() {
-        String checkboxHTML = "<input type='checkbox' id='checkbox'>";
-        String buttonHTML = "<button type='button' id='button'>I'm a Button!</button>";
-
-        return Stream.of(
-                Arguments.of(checkboxHTML, checkboxSelector, checkMethodName, checkStepPrefix),
-                Arguments.of(buttonHTML, buttonSelector, clickMethodName, clickStepPrefix),
-                Arguments.of(buttonHTML, buttonSelector, dblclickMethodName, dblclickStepPrefix)
-        );
-    }
-
-    private static Stream<Arguments> locatorFailTestDataProvider() {
-        int timeout = 50;
-        return Stream.of(
-                Arguments.of(checkboxSelector, checkMethodName, checkStepPrefix, new Locator.CheckOptions().setTimeout(timeout)),
-                Arguments.of(buttonSelector, clickMethodName, clickStepPrefix, new Locator.ClickOptions().setTimeout(timeout)),
-                Arguments.of(buttonSelector, dblclickMethodName, dblclickStepPrefix, new Locator.DblclickOptions().setTimeout(timeout))
-        );
-    }
-
-    private static void callLocatorMethod(Locator locator, String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = Locator.class.getMethod(methodName);
-        method.invoke(locator);
-    }
-
-    private static void callLocatorWithParamsMethod(Locator locator, String methodName, Object params) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = Locator.class.getMethod(methodName, params.getClass());
-        method.invoke(locator, params);
-    }
 
     @BeforeEach
     void getPage() {
@@ -69,39 +41,112 @@ public class LocatorTest {
         playwright.close();
     }
 
-    @ParameterizedTest(name = "{2} Pass Test")
-    @MethodSource("locatorPassTestDataProvider")
-    void locatorPassTest(String html, String selector, String methodName, String stepPrefix) {
-        page.setContent(html);
-        AllureResults results = runWithinTestContext(() -> {
-            Locator locator = page.locator(selector);
-            try {
-                callLocatorMethod(locator, methodName);
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }, ChannelOwnerAspect::setLifecycle);
+    @Test
+    void checkTest_Pass() {
+        page.setContent("<input type='checkbox' id='checkbox'>");
+        Locator locator = page.locator(checkboxSelector);
+        AllureResults results = runTest(locator::check);
+        assertStepsWhenPassed(results, checkStepPrefix + checkboxSelector);
+    }
 
+    @Test
+    void checkTest_Fail() {
+        Locator locator = page.locator(checkboxSelector);
+        AllureResults results = runTest(() -> locator.check(new Locator.CheckOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, checkStepPrefix + checkboxSelector);
+    }
+
+    @Test
+    void clickTest_Pass() {
+        page.setContent("<button type='button' id='button'>I'm a Button!</button>");
+        Locator locator = page.locator(buttonSelector);
+        AllureResults results = runTest(locator::click);
+        assertStepsWhenPassed(results, clickStepPrefix + buttonSelector);
+    }
+
+    @Test
+    void clickTest_Fail() {
+        Locator locator = page.locator(buttonSelector);
+        AllureResults results = runTest(() -> locator.click(new Locator.ClickOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, clickStepPrefix + buttonSelector);
+    }
+
+    @Test
+    void dblclickTest_Pass() {
+        page.setContent("<button type='button' id='button'>I'm a Button!</button>");
+        Locator locator = page.locator(buttonSelector);
+        AllureResults results = runTest(locator::dblclick);
+        assertStepsWhenPassed(results, dblclickStepPrefix + buttonSelector);
+    }
+
+    @Test
+    void dblclickTest_Fail() {
+        Locator locator = page.locator(buttonSelector);
+        AllureResults results = runTest(() -> locator.dblclick(new Locator.DblclickOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, dblclickStepPrefix + buttonSelector);
+    }
+
+    @Test
+    void dragToTest_Pass() throws IOException {
+        String content = IOUtils.resourceToString("/dragAndDrop.html", StandardCharsets.UTF_8);
+        page.setContent(content);
+        Locator sourceLocator = page.locator(dragSourceSelector);
+        Locator targetLocator = page.locator(dragTargetSelector);
+        AllureResults results = runTest(() -> sourceLocator.dragTo(targetLocator));
+        assertStepsWhenPassed(results, "Drag " + dragSourceSelector + " to " + dragTargetSelector);
+    }
+
+    @Test
+    void dragToTest_Fail() {
+        Locator sourceLocator = page.locator(dragSourceSelector);
+        Locator targetLocator = page.locator(dragTargetSelector);
+        AllureResults results = runTest(() -> sourceLocator.dragTo(targetLocator, new Locator.DragToOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, "Drag " + dragSourceSelector + " to " + dragTargetSelector);
+    }
+
+    @Test
+    void fillTest_Pass() {
+        String value = "hello";
+        page.setContent("<input id='textbox'>");
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.fill("hello"));
+        assertStepsWhenPassed(results, "Fill " + textBoxSelector + " with " + value);
+    }
+
+    @Test
+    void fillTest_Fail() {
+        String value = "hello";
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.fill("hello", new Locator.FillOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, "Fill " + textBoxSelector + " with " + value);
+    }
+
+    AllureResults runTest(Runnable test) {
+        return runWithinTestContext(test, ChannelOwnerAspect::setLifecycle);
+    }
+
+    void assertStepsWhenPassed(AllureResults results, String stepName) {
         TestResult testResult = results.getTestResults().get(0);
-        assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly(stepPrefix + selector);
+        assertStepStatusPass(testResult);
+        assertStepName(testResult, stepName);
+    }
+
+    void assertStepsWhenFailed(AllureResults results, String stepName) {
+        TestResult testResult = results.getTestResults().get(0);
+        assertStepStatusBroken(testResult);
+        assertStepName(testResult, stepName);
+        assertThat(testResult.getSteps()).extracting("statusDetails.trace").anyMatch(msg -> ((String) msg).contains("TimeoutError"));
+    }
+
+    void assertStepStatusPass(TestResult testResult) {
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getStatus).containsExactly(Status.PASSED);
     }
 
-    @ParameterizedTest(name = "{1} Fail Test")
-    @MethodSource("locatorFailTestDataProvider")
-    void locatorFailTest(String selector, String methodName, String stepPrefix, Object params) {
-        AllureResults results = runWithinTestContext(() -> {
-            Locator locator = page.locator(selector);
-            try {
-                callLocatorWithParamsMethod(locator, methodName, params);
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }, ChannelOwnerAspect::setLifecycle);
-
-        TestResult testResult = results.getTestResults().get(0);
-        assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly(stepPrefix + selector);
+    void assertStepStatusBroken(TestResult testResult) {
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getStatus).containsExactly(Status.BROKEN);
-        assertThat(testResult.getSteps()).extracting("statusDetails.trace").anyMatch(msg -> ((String) msg).contains("TimeoutError"));
+    }
+
+    void assertStepName(TestResult testResult, String stepName) {
+        assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly(stepName);
     }
 }
