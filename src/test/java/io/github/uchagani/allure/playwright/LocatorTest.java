@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static io.github.uchagani.allure.playwright.Constants.*;
 import static io.qameta.allure.test.RunUtils.runWithinTestContext;
@@ -27,6 +29,7 @@ public class LocatorTest {
     final static String dragTargetSelector = "#target";
     final static String textBoxSelector = "#textbox";
     final static String selectOptionSelector = "#select";
+    final static String inputFileSelector = "#inputFile";
     final static double timeout = 50;
     Page page;
     Playwright playwright;
@@ -191,6 +194,23 @@ public class LocatorTest {
         Locator locator = page.locator(selectOptionSelector);
         AllureResults results = runTest(() -> locator.selectOption(value, new Locator.SelectOptionOptions().setTimeout(timeout)));
         assertStepsWhenFailed(results, selectOptionStepPrefix + selectOptionSelector);
+    }
+
+    @Test
+    void setInputFileTest_Pass() {
+        Path file = Paths.get("src/test/resources/content.html");
+        page.setContent(html);
+        Locator locator = page.locator(inputFileSelector);
+        AllureResults results = runTest(() -> locator.setInputFiles(file));
+        assertStepsWhenPassed(results, setInputFilesStepPrefix + file.getFileName());
+    }
+
+    @Test
+    void setInputFileTest_Fail() {
+        Path file = Paths.get("src/test/resources/content.html");
+        Locator locator = page.locator(inputFileSelector);
+        AllureResults results = runTest(() -> locator.setInputFiles(file, new Locator.SetInputFilesOptions().setTimeout(50)));
+        assertStepsWhenFailed(results, setInputFilesStepPrefix + file.getFileName());
     }
 
     AllureResults runTest(Runnable test) {

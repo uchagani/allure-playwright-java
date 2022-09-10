@@ -26,7 +26,7 @@ class Constants {
     static final String selectOptionMethodName = "selectOption";
     static final String selectOptionStepPrefix = "Select option from ";
     static final String setInputFilesMethodName = "setInputFiles";
-    static final String setInputFilesStepPrefix = "Set input file(s) ";
+    static final String setInputFilesStepPrefix = "Set input file(s) to ";
     static final String tapMethodName = "tap";
     static final String tapStepPrefix = "Tap ";
     static final String typeMethodName = "type";
