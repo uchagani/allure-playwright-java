@@ -19,16 +19,16 @@ import static io.qameta.allure.test.RunUtils.runWithinTestContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AspectTest {
-    private Page page;
-    private Playwright playwright;
-    private final static String passSelector = ".foo";
-    private final static String failSelector = ".blah";
+    Page page;
+    Playwright playwright;
+    final static String passSelector = ".foo";
+    final static String failSelector = ".blah";
 
     @BeforeEach
     void getPage() {
         playwright = Playwright.create();
         page = playwright.chromium().launch().newPage();
-        page.setContent(" <button type='button' class='foo'>Click Me!</button> ");
+        page.setContent(" <button type='button' class='foo'>I'm a Button!</button> ");
     }
 
     @AfterEach
@@ -41,7 +41,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             Locator locator = page.locator(passSelector);
             locator.click();
-        }, LocatorAspect::setLifecycle);
+        }, ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly("click " + passSelector);
@@ -53,7 +53,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             Locator locator = page.locator(failSelector);
             locator.click(new Locator.ClickOptions().setTimeout(50));
-        }, LocatorAspect::setLifecycle);
+        }, ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getStatus()).isEqualTo(Status.BROKEN);
@@ -65,11 +65,9 @@ public class AspectTest {
     @Test
     void apiRequestContextTest_pass() {
         String url = "https://playwright.dev";
-        AllureResults results = runWithinTestContext(() -> {
-            APIResponse response = page.request().get(url);
-            assertThat(response).isOK();
-        }, APIRequestContextAspect::setLifecycle);
+        page.request().get(url);
 
+        AllureResults results = runWithinTestContext(() -> page.request().get(url), ChannelOwnerAspect::setLifecycle);
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly("GET " + url);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getStatus).containsExactly(Status.PASSED);
@@ -78,7 +76,7 @@ public class AspectTest {
     @Test
     void pageTest_pass() {
         String url = "https://playwright.dev";
-        AllureResults results = runWithinTestContext(() -> page.navigate(url), PageAspect::setLifecycle);
+        AllureResults results = runWithinTestContext(() -> page.navigate(url), ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly("navigate");
@@ -87,11 +85,12 @@ public class AspectTest {
 
     @Test
     void locatorAssertTest_pass() {
-        String expectedText = "Click";
+        String expectedText = "I'm a Button";
         AllureResults results = runWithinTestContext(() -> {
             Locator locator = page.locator(passSelector);
+            assertThat(locator).isEnabled();
             assertThat(locator).containsText(expectedText);
-        }, AssertionsAspect::setLifecycle);
+        }, ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).contains("Locator " + passSelector + " expected to contain text " + expectedText);
@@ -102,8 +101,9 @@ public class AspectTest {
         String expectedText = "abc";
         AllureResults results = runWithinTestContext(() -> {
             Locator locator = page.locator(passSelector);
+            locator.click();
             assertThat(locator).containsText(expectedText, new LocatorAssertions.ContainsTextOptions().setTimeout(50));
-        }, AssertionsAspect::setLifecycle);
+        }, ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getStatus()).isEqualTo(Status.FAILED);
@@ -116,7 +116,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             page.evaluate("document.title = 'Page Assert Test'");
             assertThat(page).hasTitle(expectedText);
-        }, AssertionsAspect::setLifecycle);
+        }, ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).contains("Page title expected to be " + expectedText);
@@ -127,7 +127,7 @@ public class AspectTest {
         String expectedText = "abc";
         AllureResults results = runWithinTestContext(() -> {
             assertThat(page).hasTitle(expectedText, new PageAssertions.HasTitleOptions().setTimeout(50));
-        }, AssertionsAspect::setLifecycle);
+        }, ChannelOwnerAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getStatus()).isEqualTo(Status.FAILED);
@@ -139,7 +139,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             APIResponse response = page.request().get("https://playwright.dev");
             assertThat(response).isOK();
-        }, AssertionsAspect::setLifecycle);
+        }, APIResponseAssertionsImplAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly("APIResponse expected to be OK");
@@ -151,7 +151,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             APIResponse response = page.request().get("https://dummy.restapiexample.com/api/v1/foo");
             assertThat(response).isOK();
-        }, AssertionsAspect::setLifecycle);
+        }, APIResponseAssertionsImplAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getStatus()).isEqualTo(Status.FAILED);
@@ -164,7 +164,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             APIResponse response = page.request().get("https://dummy.restapiexample.com/api/v1/foo");
             assertThat(response).not().isOK();
-        }, AssertionsAspect::setLifecycle);
+        }, APIResponseAssertionsImplAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly("APIResponse expected to not be OK");
@@ -176,7 +176,7 @@ public class AspectTest {
         AllureResults results = runWithinTestContext(() -> {
             APIResponse response = page.request().get("https://playwright.dev");
             assertThat(response).not().isOK();
-        }, AssertionsAspect::setLifecycle);
+        }, APIResponseAssertionsImplAspect::setLifecycle);
 
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getStatus()).isEqualTo(Status.FAILED);

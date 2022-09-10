@@ -1,26 +1,23 @@
 package io.github.uchagani.allure.playwright;
 
 import com.microsoft.playwright.impl.APIResponseAssertionsImpl;
-import com.microsoft.playwright.impl.LocatorAssertionsImpl;
 import io.qameta.allure.Allure;
 import io.qameta.allure.AllureLifecycle;
-import io.qameta.allure.model.Parameter;
 import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StepResult;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import java.util.List;
+import java.lang.reflect.Field;
 import java.util.UUID;
 
-import static io.qameta.allure.util.AspectUtils.getParameters;
 import static io.qameta.allure.util.ResultsUtils.getStatus;
 import static io.qameta.allure.util.ResultsUtils.getStatusDetails;
 
 @SuppressWarnings("unused")
 @Aspect
-public class AssertionsAspect {
+public class APIResponseAssertionsImplAspect {
     private static final InheritableThreadLocal<AllureLifecycle> lifecycle =
             new InheritableThreadLocal<AllureLifecycle>() {
                 @Override
@@ -28,12 +25,6 @@ public class AssertionsAspect {
                     return Allure.getLifecycle();
                 }
             };
-
-    @Pointcut(
-            "execution(* com.microsoft.playwright.impl.AssertionsBase.expectImpl(String, com.microsoft.playwright.impl.FrameExpectOptions, Object, String))")
-    public void pageOrLocatorAssertionMethod() {
-        //pointcut body, should be empty
-    }
 
     @Pointcut("execution(* com.microsoft.playwright.impl.APIResponseAssertionsImpl.isOK())")
     public void apiResponseIsOk() {
@@ -44,8 +35,8 @@ public class AssertionsAspect {
     public void stepStartApiResponse(final JoinPoint joinPoint) throws NoSuchFieldException, IllegalAccessException {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         APIResponseAssertionsImpl apiResponseAssertionsImpl = (APIResponseAssertionsImpl) joinPoint.getTarget();
-        String stepName = "APIResponse expected to ";
-        if (PlaywrightUtils.getIsNot(apiResponseAssertionsImpl)) {
+        String stepName = "Expect APIResponse to ";
+        if (getIsNot(apiResponseAssertionsImpl)) {
             stepName = stepName + "not ";
         }
         stepName = stepName + "be OK";
@@ -54,38 +45,14 @@ public class AssertionsAspect {
         getLifecycle().startStep(uuid, result);
     }
 
-    @Before("pageOrLocatorAssertionMethod()")
-    public void stepStart(final JoinPoint joinPoint) throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        List<Parameter> parameters = getParameters(methodSignature, joinPoint.getArgs());
-        String uuid = UUID.randomUUID().toString();
-        String message;
-        String actual;
-
-        if (parameters.get(3).getValue().startsWith("Locator")) {
-            LocatorAssertionsImpl locatorAssertionsImpl = (LocatorAssertionsImpl) joinPoint.getTarget();
-            String selector = PlaywrightUtils.getSelector(locatorAssertionsImpl);
-            message = parameters.get(3).getValue().replace("Locator", "Locator " + selector);
-            actual = parameters.get(2).getValue();
-        } else {
-            message = parameters.get(3).getValue();
-            actual = parameters.get(2).getValue();
-        }
-
-
-        String stepName = String.format("%s %s", message, actual);
-        StepResult result = new StepResult().setName(stepName);
-        getLifecycle().startStep(uuid, result);
-    }
-
-    @AfterThrowing(pointcut = "pageOrLocatorAssertionMethod() || apiResponseIsOk()", throwing = "e")
+    @AfterThrowing(pointcut = "apiResponseIsOk()", throwing = "e")
     public void stepFailed(final Throwable e) {
         getLifecycle().updateStep(s -> s.setStatus(getStatus(e).orElse(Status.BROKEN))
                 .setStatusDetails(getStatusDetails(e).orElse(null)));
         getLifecycle().stopStep();
     }
 
-    @AfterReturning(pointcut = "pageOrLocatorAssertionMethod() || apiResponseIsOk()")
+    @AfterReturning(pointcut = "apiResponseIsOk()")
     public void stepStop() {
         getLifecycle().updateStep(s -> s.setStatus(Status.PASSED));
         getLifecycle().stopStep();
@@ -97,5 +64,11 @@ public class AssertionsAspect {
 
     public static AllureLifecycle getLifecycle() {
         return lifecycle.get();
+    }
+
+    private static boolean getIsNot(APIResponseAssertionsImpl apiResponseAssertionsImpl) throws NoSuchFieldException, IllegalAccessException {
+        Field isNotField = apiResponseAssertionsImpl.getClass().getDeclaredField("isNot");
+        isNotField.setAccessible(true);
+        return (boolean) isNotField.get(apiResponseAssertionsImpl);
     }
 }
