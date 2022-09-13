@@ -22,7 +22,7 @@ public class TestBase {
     Playwright playwright;
     Page page;
     final static String html;
-    final static double timeout = 50;
+    final static double timeout = 1;
     final static String checkboxSelector = "#checkbox";
     final static String buttonSelector = "#button";
     final static String dragSourceSelector = "#source";
@@ -53,21 +53,45 @@ public class TestBase {
         playwright.close();
     }
 
+    boolean manualTest() {
+        return System.getProperty("manualTest") != null;
+    }
+
     AllureResults runTest(Runnable test) {
+        if (manualTest()) {
+            test.run();
+            return null;
+        }
         return runWithinTestContext(test, ChannelOwnerAspect::setLifecycle);
     }
 
     void assertStepsWhenPassed(AllureResults results, String stepName) {
+        if (manualTest()) {
+            return;
+        }
         TestResult testResult = results.getTestResults().get(0);
         assertStepStatusPass(testResult);
         assertStepName(testResult, stepName);
     }
 
-    void assertStepsWhenFailed(AllureResults results, String stepName) {
+    void assertStepsWhenBroken(AllureResults results, String stepName) {
+        if (manualTest()) {
+            return;
+        }
         TestResult testResult = results.getTestResults().get(0);
         assertStepStatusBroken(testResult);
         assertStepName(testResult, stepName);
         assertThat(testResult.getSteps()).extracting("statusDetails.trace").anyMatch(msg -> ((String) msg).contains("TimeoutError"));
+    }
+
+    void assertStepsWhenFailed(AllureResults results, String stepName) {
+        if (manualTest()) {
+            return;
+        }
+        TestResult testResult = results.getTestResults().get(0);
+        assertThat(testResult.getStatus()).isEqualTo(Status.FAILED);
+        assertStepName(testResult, stepName);
+        assertThat(testResult.getStatusDetails().getTrace()).contains("AssertionFailedError");
     }
 
     void assertStepStatusPass(TestResult testResult) {

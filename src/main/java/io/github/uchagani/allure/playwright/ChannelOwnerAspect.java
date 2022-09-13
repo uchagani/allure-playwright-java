@@ -43,10 +43,8 @@ public class ChannelOwnerAspect {
         actionMethodNamesMap.put(goForwardMethodName, goForwardStepPrefix);
         actionMethodNamesMap.put(closeMethodName, closeStepPrefix);
         actionMethodNamesMap.put(gotoMethodName, gotoStepPrefix);
-
-        actionMethodNamesMap.put("expect", "");
-        actionMethodNamesMap.put("fetch", "");
-
+        actionMethodNamesMap.put(expectMethodName, expectStepPrefix);
+        actionMethodNamesMap.put(fetchMethodName, fetchStepPrefix);
     }
 
     private static final InheritableThreadLocal<AllureLifecycle> lifecycle =
@@ -59,7 +57,6 @@ public class ChannelOwnerAspect {
 
     @Pointcut("execution(* com.microsoft.playwright.impl.ChannelOwner.sendMessage(String, com.google.gson.JsonObject))")
     public void actionMethods() {
-        //pointcut body, should be empty
     }
 
     @Before("actionMethods()")

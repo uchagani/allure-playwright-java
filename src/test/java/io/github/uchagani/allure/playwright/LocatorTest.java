@@ -1,12 +1,7 @@
 package io.github.uchagani.allure.playwright;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Playwright;
 import io.qameta.allure.test.AllureResults;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -15,18 +10,6 @@ import java.nio.file.Paths;
 import static io.github.uchagani.allure.playwright.Constants.*;
 
 public class LocatorTest extends TestBase {
-    @BeforeEach
-    void getPage() {
-        playwright = Playwright.create();
-        BrowserContext context = playwright.chromium().launch().newContext(new Browser.NewContextOptions().setHasTouch(true));
-        page = context.newPage();
-    }
-
-    @AfterEach
-    void cleanup() {
-        playwright.close();
-    }
-
     @Test
     void checkTest_Pass() {
         page.setContent(html);
@@ -39,7 +22,7 @@ public class LocatorTest extends TestBase {
     void checkTest_Fail() {
         Locator locator = page.locator(checkboxSelector);
         AllureResults results = runTest(() -> locator.check(new Locator.CheckOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, checkStepPrefix + checkboxSelector);
+        assertStepsWhenBroken(results, checkStepPrefix + checkboxSelector);
     }
 
     @Test
@@ -54,7 +37,7 @@ public class LocatorTest extends TestBase {
     void clickTest_Fail() {
         Locator locator = page.locator(buttonSelector);
         AllureResults results = runTest(() -> locator.click(new Locator.ClickOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, clickStepPrefix + buttonSelector);
+        assertStepsWhenBroken(results, clickStepPrefix + buttonSelector);
     }
 
     @Test
@@ -69,7 +52,7 @@ public class LocatorTest extends TestBase {
     void dblclickTest_Fail() {
         Locator locator = page.locator(buttonSelector);
         AllureResults results = runTest(() -> locator.dblclick(new Locator.DblclickOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, dblclickStepPrefix + buttonSelector);
+        assertStepsWhenBroken(results, dblclickStepPrefix + buttonSelector);
     }
 
     @Test
@@ -86,7 +69,7 @@ public class LocatorTest extends TestBase {
         Locator sourceLocator = page.locator(dragSourceSelector);
         Locator targetLocator = page.locator(dragTargetSelector);
         AllureResults results = runTest(() -> sourceLocator.dragTo(targetLocator, new Locator.DragToOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, "Drag " + dragSourceSelector + " to " + dragTargetSelector);
+        assertStepsWhenBroken(results, "Drag " + dragSourceSelector + " to " + dragTargetSelector);
     }
 
     @Test
@@ -103,7 +86,7 @@ public class LocatorTest extends TestBase {
         String value = "hello";
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.fill("hello", new Locator.FillOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, "Fill " + textBoxSelector + " with " + value);
+        assertStepsWhenBroken(results, "Fill " + textBoxSelector + " with " + value);
     }
 
     @Test
@@ -118,7 +101,7 @@ public class LocatorTest extends TestBase {
     void focusTest_Fail() {
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.focus(new Locator.FocusOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, focusStepPrefix + textBoxSelector);
+        assertStepsWhenBroken(results, focusStepPrefix + textBoxSelector);
     }
 
     @Test
@@ -133,7 +116,7 @@ public class LocatorTest extends TestBase {
     void hoverTest_Fail() {
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.hover(new Locator.HoverOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, hoverStepPrefix + textBoxSelector);
+        assertStepsWhenBroken(results, hoverStepPrefix + textBoxSelector);
     }
 
     @Test
@@ -150,7 +133,7 @@ public class LocatorTest extends TestBase {
         String key = "Shift+a";
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.press("Shift+a", new Locator.PressOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, "Press key(s) " + key + " on " + textBoxSelector);
+        assertStepsWhenBroken(results, "Press key(s) " + key + " on " + textBoxSelector);
     }
 
     @Test
@@ -167,7 +150,7 @@ public class LocatorTest extends TestBase {
         String value = "audi";
         Locator locator = page.locator(selectOptionSelector);
         AllureResults results = runTest(() -> locator.selectOption(value, new Locator.SelectOptionOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, selectOptionStepPrefix + selectOptionSelector);
+        assertStepsWhenBroken(results, selectOptionStepPrefix + selectOptionSelector);
     }
 
     @Test
@@ -184,7 +167,7 @@ public class LocatorTest extends TestBase {
         Path file = Paths.get("src/test/resources/content.html");
         Locator locator = page.locator(inputFileSelector);
         AllureResults results = runTest(() -> locator.setInputFiles(file, new Locator.SetInputFilesOptions().setTimeout(50)));
-        assertStepsWhenFailed(results, setInputFilesStepPrefix + file.getFileName());
+        assertStepsWhenBroken(results, setInputFilesStepPrefix + file.getFileName());
     }
 
     @Test
@@ -199,7 +182,7 @@ public class LocatorTest extends TestBase {
     void tapTest_Fail() {
         Locator locator = page.locator(divSelector);
         AllureResults results = runTest(() -> locator.tap(new Locator.TapOptions().setTimeout(50)));
-        assertStepsWhenFailed(results, tapStepPrefix + divSelector);
+        assertStepsWhenBroken(results, tapStepPrefix + divSelector);
     }
 
     @Test
@@ -216,7 +199,7 @@ public class LocatorTest extends TestBase {
         String text = "abc";
         Locator locator = page.locator(textBoxSelector);
         AllureResults results = runTest(() -> locator.type(text, new Locator.TypeOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, "Type " + text + " on " + textBoxSelector);
+        assertStepsWhenBroken(results, "Type " + text + " on " + textBoxSelector);
     }
 
     @Test
@@ -231,6 +214,6 @@ public class LocatorTest extends TestBase {
     void uncheckTest_Fail() {
         Locator locator = page.locator(checkedCheckboxSelector);
         AllureResults results = runTest(() -> locator.uncheck(new Locator.UncheckOptions().setTimeout(timeout)));
-        assertStepsWhenFailed(results, uncheckStepPrefix + checkedCheckboxSelector);
+        assertStepsWhenBroken(results, uncheckStepPrefix + checkedCheckboxSelector);
     }
 }

@@ -28,7 +28,6 @@ public class APIResponseAssertionsImplAspect {
 
     @Pointcut("execution(* com.microsoft.playwright.impl.APIResponseAssertionsImpl.isOK())")
     public void apiResponseIsOk() {
-        //pointcut body, should be empty
     }
 
     @Before("apiResponseIsOk()")
