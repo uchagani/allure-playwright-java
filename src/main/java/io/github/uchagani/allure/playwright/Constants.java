@@ -30,7 +30,7 @@ class Constants {
     static final String tapMethodName = "tap";
     static final String tapStepPrefix = "Tap ";
     static final String typeMethodName = "type";
-    static final String typeStepPrefix = "Type ";
+    static final String typeStepPrefix = "";
     static final String uncheckMethodName = "uncheck";
     static final String uncheckStepPrefix = "Uncheck ";
 }

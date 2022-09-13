@@ -36,11 +36,9 @@ public class ChannelOwnerAspect {
         actionMethodNamesMap.put(pressMethodName, pressStepPrefix);
         actionMethodNamesMap.put(selectOptionMethodName, selectOptionStepPrefix);
         actionMethodNamesMap.put(setInputFilesMethodName, setInputFilesStepPrefix);
-
         actionMethodNamesMap.put(tapMethodName, tapStepPrefix);
         actionMethodNamesMap.put(typeMethodName, typeStepPrefix);
         actionMethodNamesMap.put(uncheckMethodName, uncheckStepPrefix);
-
 
         actionMethodNamesMap.put(goBackMethodName, goBackStepPrefix);
         actionMethodNamesMap.put(goForwardMethodName, goForwardStepPrefix);
@@ -145,6 +143,10 @@ public class ChannelOwnerAspect {
         return setInputFilesStepPrefix + filename;
     }
 
+    private String getStepNameForType(JsonObject params) {
+        return "Type " + params.get("text").getAsString() + " on " + params.get("selector").getAsString();
+    }
+
     private String getStepName(String method, JsonObject params) {
         if (method.equals("fetch")) {
             return getStepNameForAPIRequest(params);
@@ -170,8 +172,12 @@ public class ChannelOwnerAspect {
             return getStepNameForPress(params);
         }
 
-        if(method.equals("setInputFiles")) {
+        if (method.equals("setInputFiles")) {
             return getStepNameForSetInputFiles(params);
+        }
+
+        if (method.equals("type")) {
+            return getStepNameForType(params);
         }
 
         return getStepNameForLocator(method, params);

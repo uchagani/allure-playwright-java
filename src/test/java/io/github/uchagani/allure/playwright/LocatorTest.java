@@ -1,8 +1,6 @@
 package io.github.uchagani.allure.playwright;
 
-import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.*;
 import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
@@ -30,6 +28,9 @@ public class LocatorTest {
     final static String textBoxSelector = "#textbox";
     final static String selectOptionSelector = "#select";
     final static String inputFileSelector = "#inputFile";
+    final static String divSelector = "#tap";
+    final static String checkedCheckboxSelector = "#checkboxChecked";
+
     final static double timeout = 50;
     Page page;
     Playwright playwright;
@@ -45,7 +46,8 @@ public class LocatorTest {
     @BeforeEach
     void getPage() {
         playwright = Playwright.create();
-        page = playwright.chromium().launch().newPage();
+        BrowserContext context = playwright.chromium().launch().newContext(new Browser.NewContextOptions().setHasTouch(true));
+        page = context.newPage();
     }
 
     @AfterEach
@@ -211,6 +213,53 @@ public class LocatorTest {
         Locator locator = page.locator(inputFileSelector);
         AllureResults results = runTest(() -> locator.setInputFiles(file, new Locator.SetInputFilesOptions().setTimeout(50)));
         assertStepsWhenFailed(results, setInputFilesStepPrefix + file.getFileName());
+    }
+
+    @Test
+    void tapTest_Pass() {
+        page.setContent(html);
+        Locator locator = page.locator(divSelector);
+        AllureResults results = runTest(locator::tap);
+        assertStepsWhenPassed(results, tapStepPrefix + divSelector);
+    }
+
+    @Test
+    void tapTest_Fail() {
+        Locator locator = page.locator(divSelector);
+        AllureResults results = runTest(() -> locator.tap(new Locator.TapOptions().setTimeout(50)));
+        assertStepsWhenFailed(results, tapStepPrefix + divSelector);
+    }
+
+    @Test
+    void typeTest_Pass() {
+        String text = "abc";
+        page.setContent(html);
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.type(text));
+        assertStepsWhenPassed(results, "Type " + text + " on " + textBoxSelector);
+    }
+
+    @Test
+    void typeTest_Fail() {
+        String text = "abc";
+        Locator locator = page.locator(textBoxSelector);
+        AllureResults results = runTest(() -> locator.type(text, new Locator.TypeOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, "Type " + text + " on " + textBoxSelector);
+    }
+
+    @Test
+    void uncheckTest_Pass() {
+        page.setContent(html);
+        Locator locator = page.locator(checkedCheckboxSelector);
+        AllureResults results = runTest(locator::uncheck);
+        assertStepsWhenPassed(results, uncheckStepPrefix + checkedCheckboxSelector);
+    }
+
+    @Test
+    void uncheckTest_Fail() {
+        Locator locator = page.locator(checkedCheckboxSelector);
+        AllureResults results = runTest(() -> locator.uncheck(new Locator.UncheckOptions().setTimeout(timeout)));
+        assertStepsWhenFailed(results, uncheckStepPrefix + checkedCheckboxSelector);
     }
 
     AllureResults runTest(Runnable test) {
