@@ -39,11 +39,11 @@ public class ChannelOwnerAspect {
         actionMethodNamesMap.put(tapMethodName, tapStepPrefix);
         actionMethodNamesMap.put(typeMethodName, typeStepPrefix);
         actionMethodNamesMap.put(uncheckMethodName, uncheckStepPrefix);
-
         actionMethodNamesMap.put(goBackMethodName, goBackStepPrefix);
         actionMethodNamesMap.put(goForwardMethodName, goForwardStepPrefix);
-        actionMethodNamesMap.put("close", "Close ");
-        actionMethodNamesMap.put("goto", "Navigate to ");
+        actionMethodNamesMap.put(closeMethodName, closeStepPrefix);
+        actionMethodNamesMap.put(gotoMethodName, gotoStepPrefix);
+
         actionMethodNamesMap.put("expect", "");
         actionMethodNamesMap.put("fetch", "");
 
@@ -115,7 +115,7 @@ public class ChannelOwnerAspect {
     }
 
     private String getStepNameForNavigation(JsonObject params) {
-        return actionMethodNamesMap.get("goto") + " " + params.get("url").getAsString();
+        return gotoStepPrefix + params.get("url").getAsString();
     }
 
     private String getStepNameForLocator(String method, JsonObject params) {
@@ -178,6 +178,18 @@ public class ChannelOwnerAspect {
 
         if (method.equals("type")) {
             return getStepNameForType(params);
+        }
+
+        if (method.equals("goBack")) {
+            return goBackStepPrefix;
+        }
+
+        if (method.equals("goForward")) {
+            return goForwardStepPrefix;
+        }
+
+        if (method.equals("close")) {
+            return closeStepPrefix;
         }
 
         return getStepNameForLocator(method, params);

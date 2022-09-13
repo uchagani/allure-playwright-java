@@ -33,4 +33,8 @@ class Constants {
     static final String typeStepPrefix = "";
     static final String uncheckMethodName = "uncheck";
     static final String uncheckStepPrefix = "Uncheck ";
+    static final String closeMethodName = "close";
+    static final String closeStepPrefix = "Close page";
+    static final String gotoMethodName = "goto";
+    static final String gotoStepPrefix = "Navigate to ";
 }

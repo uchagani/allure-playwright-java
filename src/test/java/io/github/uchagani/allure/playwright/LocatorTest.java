@@ -1,48 +1,20 @@
 package io.github.uchagani.allure.playwright;
 
-import com.microsoft.playwright.*;
-import io.qameta.allure.model.Status;
-import io.qameta.allure.model.StepResult;
-import io.qameta.allure.model.TestResult;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Playwright;
 import io.qameta.allure.test.AllureResults;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.github.uchagani.allure.playwright.Constants.*;
-import static io.qameta.allure.test.RunUtils.runWithinTestContext;
-import static org.assertj.core.api.Assertions.assertThat;
 
-public class LocatorTest {
-    final static String html;
-    final static String checkboxSelector = "#checkbox";
-    final static String buttonSelector = "#button";
-    final static String dragSourceSelector = "#source";
-    final static String dragTargetSelector = "#target";
-    final static String textBoxSelector = "#textbox";
-    final static String selectOptionSelector = "#select";
-    final static String inputFileSelector = "#inputFile";
-    final static String divSelector = "#tap";
-    final static String checkedCheckboxSelector = "#checkboxChecked";
-
-    final static double timeout = 50;
-    Page page;
-    Playwright playwright;
-
-    static {
-        try {
-            html = IOUtils.resourceToString("/content.html", StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
+public class LocatorTest extends TestBase {
     @BeforeEach
     void getPage() {
         playwright = Playwright.create();
@@ -260,34 +232,5 @@ public class LocatorTest {
         Locator locator = page.locator(checkedCheckboxSelector);
         AllureResults results = runTest(() -> locator.uncheck(new Locator.UncheckOptions().setTimeout(timeout)));
         assertStepsWhenFailed(results, uncheckStepPrefix + checkedCheckboxSelector);
-    }
-
-    AllureResults runTest(Runnable test) {
-        return runWithinTestContext(test, ChannelOwnerAspect::setLifecycle);
-    }
-
-    void assertStepsWhenPassed(AllureResults results, String stepName) {
-        TestResult testResult = results.getTestResults().get(0);
-        assertStepStatusPass(testResult);
-        assertStepName(testResult, stepName);
-    }
-
-    void assertStepsWhenFailed(AllureResults results, String stepName) {
-        TestResult testResult = results.getTestResults().get(0);
-        assertStepStatusBroken(testResult);
-        assertStepName(testResult, stepName);
-        assertThat(testResult.getSteps()).extracting("statusDetails.trace").anyMatch(msg -> ((String) msg).contains("TimeoutError"));
-    }
-
-    void assertStepStatusPass(TestResult testResult) {
-        assertThat(testResult.getSteps()).flatExtracting(StepResult::getStatus).containsExactly(Status.PASSED);
-    }
-
-    void assertStepStatusBroken(TestResult testResult) {
-        assertThat(testResult.getSteps()).flatExtracting(StepResult::getStatus).containsExactly(Status.BROKEN);
-    }
-
-    void assertStepName(TestResult testResult, String stepName) {
-        assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly(stepName);
     }
 }
