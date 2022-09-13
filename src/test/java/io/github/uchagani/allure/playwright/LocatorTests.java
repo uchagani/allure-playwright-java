@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 
 import static io.github.uchagani.allure.playwright.Constants.*;
 
-public class LocatorTest extends TestBase {
+public class LocatorTests extends TestBase {
     @Test
     void checkTest_Pass() {
         page.setContent(html);

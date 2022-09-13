@@ -19,8 +19,6 @@ import static io.qameta.allure.test.RunUtils.runWithinTestContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestBase {
-    Playwright playwright;
-    Page page;
     final static String html;
     final static double timeout = 1;
     final static String checkboxSelector = "#checkbox";
@@ -41,6 +39,9 @@ public class TestBase {
         }
     }
 
+    Playwright playwright;
+    Page page;
+
     @BeforeEach
     void getPage() {
         playwright = Playwright.create();
@@ -53,31 +54,17 @@ public class TestBase {
         playwright.close();
     }
 
-    boolean manualTest() {
-        return System.getProperty("manualTest") != null;
-    }
-
     AllureResults runTest(Runnable test) {
-        if (manualTest()) {
-            test.run();
-            return null;
-        }
         return runWithinTestContext(test, ChannelOwnerAspect::setLifecycle);
     }
 
     void assertStepsWhenPassed(AllureResults results, String stepName) {
-        if (manualTest()) {
-            return;
-        }
         TestResult testResult = results.getTestResults().get(0);
         assertStepStatusPass(testResult);
         assertStepName(testResult, stepName);
     }
 
     void assertStepsWhenBroken(AllureResults results, String stepName) {
-        if (manualTest()) {
-            return;
-        }
         TestResult testResult = results.getTestResults().get(0);
         assertStepStatusBroken(testResult);
         assertStepName(testResult, stepName);
@@ -85,9 +72,6 @@ public class TestBase {
     }
 
     void assertStepsWhenFailed(AllureResults results, String stepName) {
-        if (manualTest()) {
-            return;
-        }
         TestResult testResult = results.getTestResults().get(0);
         assertThat(testResult.getStatus()).isEqualTo(Status.FAILED);
         assertStepName(testResult, stepName);

@@ -15,6 +15,7 @@ div:not(.mouse-helper) {
 
 
 
+
 </style>
 
 <script>
@@ -39,26 +40,27 @@ function drop_handler(ev) {
 
 
 
+
 </script>
 
 <body>
 <div>
-    <p id="source" ondragstart="dragstart_handler(event);" draggable="true">
+    <p draggable="true" id="source" ondragstart="dragstart_handler(event);">
         Select this element, drag it to the Drop Zone and then release the selection to move the element.</p>
 </div>
-<div id="target" ondrop="drop_handler(event);" ondragover="dragover_handler(event);">Drop Zone</div>
+<div id="target" ondragover="dragover_handler(event);" ondrop="drop_handler(event);">Drop Zone</div>
 
 <div>
-    <input type='checkbox' id='checkbox'>
+    <input id='checkbox' type='checkbox'>
 </div>
 
 <div>
-    <input type='checkbox' id='checkboxChecked' checked>
+    <input checked id='checkboxChecked' type='checkbox'>
 </div>
 
 
 <div>
-    <button type='button' id='button'>I'm a Button!</button>
+    <button id='button' type='button'>I'm a Button!</button>
 </div>
 
 <div>
@@ -75,7 +77,7 @@ function drop_handler(ev) {
 </div>
 
 <div>
-    <input type="file" id="inputFile">
+    <input id="inputFile" type="file">
 </div>
 
 <div>

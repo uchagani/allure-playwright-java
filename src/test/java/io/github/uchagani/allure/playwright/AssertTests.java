@@ -81,5 +81,4 @@ public class AssertTests extends TestBase {
         Assertions.assertThat(testResult.getSteps()).flatExtracting(StepResult::getName).containsExactly("Expect APIResponse to not be OK");
         Assertions.assertThat(testResult.getSteps()).flatExtracting(StepResult::getStatus).containsExactly(Status.FAILED);
     }
-
 }

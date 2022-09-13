@@ -22,9 +22,7 @@ public class APIRequestContextTests extends TestBase {
         String url = "https://" + UUID.randomUUID() + ".com";
         AllureResults results = runTest(() -> page.request().get(url));
         TestResult testResult = results.getTestResults().get(0);
-        if (manualTest()) {
-            return;
-        }
+
         assertStepStatusBroken(testResult);
         assertStepName(testResult, "GET " + url);
         assertThat(testResult.getSteps()).extracting("statusDetails.trace").anyMatch(msg -> ((String) msg).contains("PlaywrightException"));

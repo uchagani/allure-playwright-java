@@ -26,6 +26,20 @@ public class APIResponseAssertionsImplAspect {
                 }
             };
 
+    public static AllureLifecycle getLifecycle() {
+        return lifecycle.get();
+    }
+
+    public static void setLifecycle(final AllureLifecycle allure) {
+        lifecycle.set(allure);
+    }
+
+    private static boolean getIsNot(APIResponseAssertionsImpl apiResponseAssertionsImpl) throws NoSuchFieldException, IllegalAccessException {
+        Field isNotField = apiResponseAssertionsImpl.getClass().getDeclaredField("isNot");
+        isNotField.setAccessible(true);
+        return (boolean) isNotField.get(apiResponseAssertionsImpl);
+    }
+
     @Pointcut("execution(* com.microsoft.playwright.impl.APIResponseAssertionsImpl.isOK())")
     public void apiResponseIsOk() {
     }
@@ -55,19 +69,5 @@ public class APIResponseAssertionsImplAspect {
     public void stepStop() {
         getLifecycle().updateStep(s -> s.setStatus(Status.PASSED));
         getLifecycle().stopStep();
-    }
-
-    public static void setLifecycle(final AllureLifecycle allure) {
-        lifecycle.set(allure);
-    }
-
-    public static AllureLifecycle getLifecycle() {
-        return lifecycle.get();
-    }
-
-    private static boolean getIsNot(APIResponseAssertionsImpl apiResponseAssertionsImpl) throws NoSuchFieldException, IllegalAccessException {
-        Field isNotField = apiResponseAssertionsImpl.getClass().getDeclaredField("isNot");
-        isNotField.setAccessible(true);
-        return (boolean) isNotField.get(apiResponseAssertionsImpl);
     }
 }

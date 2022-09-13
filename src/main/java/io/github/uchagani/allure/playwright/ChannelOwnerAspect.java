@@ -24,6 +24,13 @@ import static io.qameta.allure.util.ResultsUtils.getStatusDetails;
 @Aspect
 public class ChannelOwnerAspect {
     static final Map<String, String> actionMethodNamesMap = new HashMap<>();
+    private static final InheritableThreadLocal<AllureLifecycle> lifecycle =
+            new InheritableThreadLocal<AllureLifecycle>() {
+                @Override
+                protected AllureLifecycle initialValue() {
+                    return Allure.getLifecycle();
+                }
+            };
 
     static {
         actionMethodNamesMap.put(checkMethodName, checkStepPrefix);
@@ -47,13 +54,13 @@ public class ChannelOwnerAspect {
         actionMethodNamesMap.put(fetchMethodName, fetchStepPrefix);
     }
 
-    private static final InheritableThreadLocal<AllureLifecycle> lifecycle =
-            new InheritableThreadLocal<AllureLifecycle>() {
-                @Override
-                protected AllureLifecycle initialValue() {
-                    return Allure.getLifecycle();
-                }
-            };
+    public static AllureLifecycle getLifecycle() {
+        return lifecycle.get();
+    }
+
+    public static void setLifecycle(final AllureLifecycle allure) {
+        lifecycle.set(allure);
+    }
 
     @Pointcut("execution(* com.microsoft.playwright.impl.ChannelOwner.sendMessage(String, com.google.gson.JsonObject))")
     public void actionMethods() {
@@ -86,14 +93,6 @@ public class ChannelOwnerAspect {
     public void stepStop() {
         getLifecycle().updateStep(s -> s.setStatus(Status.PASSED));
         getLifecycle().stopStep();
-    }
-
-    public static void setLifecycle(final AllureLifecycle allure) {
-        lifecycle.set(allure);
-    }
-
-    public static AllureLifecycle getLifecycle() {
-        return lifecycle.get();
     }
 
     private String getStepNameForAssertion(JsonObject params) {
