@@ -23,7 +23,7 @@ an [Allure Report](https://docs.qameta.io/allure-report/).
 <dependency>
     <groupId>io.github.uchagani</groupId>
     <artifactId>allure-playwright-java</artifactId>
-    <version>1.0.0</version>
+    <version>LATEST_VERSION</version>
 </dependency>
 ```
 
