@@ -6,7 +6,7 @@
 
     <groupId>io.github.uchagani</groupId>
     <artifactId>allure-playwright-java</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 
     <name>allure-playwright-java</name>
     <description>Playwright Java adapter for Allure Framework</description>
