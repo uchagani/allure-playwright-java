@@ -1,0 +1,87 @@
+<style>
+div:not(.mouse-helper) {
+  margin: 0em;
+  padding: 2em;
+}
+#source {
+  color: blue;
+  border: 1px solid black;
+}
+#target {
+  border: 1px solid black;
+}
+
+
+
+
+
+
+</style>
+
+<script>
+
+function dragstart_handler(ev) {
+  ev.currentTarget.style.border = "dashed";
+  ev.dataTransfer.setData("text/plain", ev.target.id);
+}
+
+function dragover_handler(ev) {
+  ev.preventDefault();
+}
+
+function drop_handler(ev) {
+  console.log("Drop");
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("text");
+  ev.target.appendChild(document.getElementById(data));
+}
+
+
+
+
+
+
+</script>
+
+<body>
+<div>
+    <p draggable="true" id="source" ondragstart="dragstart_handler(event);">
+        Select this element, drag it to the Drop Zone and then release the selection to move the element.</p>
+</div>
+<div id="target" ondragover="dragover_handler(event);" ondrop="drop_handler(event);">Drop Zone</div>
+
+<div>
+    <input id='checkbox' type='checkbox'>
+</div>
+
+<div>
+    <input checked id='checkboxChecked' type='checkbox'>
+</div>
+
+
+<div>
+    <button id='button' type='button'>I'm a Button!</button>
+</div>
+
+<div>
+    <input id='textbox'>
+</div>
+
+<div>
+    <select id="select">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="opel">Opel</option>
+        <option value="audi">Audi</option>
+    </select>
+</div>
+
+<div>
+    <input id="inputFile" type="file">
+</div>
+
+<div>
+    <div id='tap' style='background: lightblue; width: 50px; height: 50px'>tap tap tap</div>
+</div>
+
+</body>

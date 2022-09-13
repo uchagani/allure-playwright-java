@@ -1,0 +1,40 @@
+package io.github.uchagani.allure.playwright;
+
+class Constants {
+    static final String checkMethodName = "check";
+    static final String checkStepPrefix = "Check ";
+    static final String clickMethodName = "click";
+    static final String clickStepPrefix = "Click ";
+    static final String dblclickMethodName = "dblclick";
+    static final String dblclickStepPrefix = "Double click ";
+    static final String dragAndDropMethodName = "dragAndDrop";
+    static final String fillMethodName = "fill";
+    static final String focusMethodName = "focus";
+    static final String focusStepPrefix = "Focus on ";
+    static final String goBackMethodName = "goBack";
+    static final String goBackStepPrefix = "Go back ";
+    static final String goForwardMethodName = "goForward";
+    static final String goForwardStepPrefix = "Go forward ";
+    static final String hoverMethodName = "hover";
+    static final String hoverStepPrefix = "Hover over ";
+    static final String pressMethodName = "press";
+    static final String pressStepPrefix = "";
+    static final String selectOptionMethodName = "selectOption";
+    static final String selectOptionStepPrefix = "Select option from ";
+    static final String setInputFilesMethodName = "setInputFiles";
+    static final String setInputFilesStepPrefix = "Set input file(s) to ";
+    static final String tapMethodName = "tap";
+    static final String tapStepPrefix = "Tap ";
+    static final String typeMethodName = "type";
+    static final String typeStepPrefix = "";
+    static final String uncheckMethodName = "uncheck";
+    static final String uncheckStepPrefix = "Uncheck ";
+    static final String closeMethodName = "close";
+    static final String closeStepPrefix = "Close page";
+    static final String gotoMethodName = "goto";
+    static final String gotoStepPrefix = "Navigate to ";
+    static final String expectMethodName = "expect";
+    static final String expectStepPrefix = "";
+    static final String fetchMethodName = "fetch";
+    static final String fetchStepPrefix = "";
+}
